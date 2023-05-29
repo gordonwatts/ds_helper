@@ -1,0 +1,7 @@
+rucio
+pyAMI_atlas
+
+# For development
+black
+flake8
+pytest
