@@ -1,5 +1,6 @@
 from ami_helper import ami_tag_metadata
 from ds_helper.ds_helpers import return_tags
+from typing import List, Dict
 
 import argparse
 
@@ -17,13 +18,19 @@ def find(args):
         args (Dict[str, str]): The arguments from the `argparse` command
     """
     all_datasets = lookup_datasets(args.scope, args.ds_name)
+    info: List[Dict[str, str]] = []
     for ds in all_datasets:
         files = get_files(args.scope, ds)
         count = sum(1 for _ in files)
+        dt = {"Name": ds, "Files": count}
         if count > 0:
-            tag = return_tags(ds)[-1]
-            cache_name = ami_tag_metadata(tag)["cacheName"]
-            print(count, cache_name, ds)
+            if args.ami:
+                tag = return_tags(ds)[-1]
+                cache_name = ami_tag_metadata(tag)["cacheName"]
+                dt["Cache"] = cache_name
+            info.append(dt)
+
+    print(info)
 
 
 def main():
@@ -45,6 +52,12 @@ def main():
     )
     cmd_find.add_argument(
         "ds_name", type=str, help="Dataset name, with standard rucio wildcards"
+    )
+    cmd_find.add_argument(
+        "--ami",
+        action=argparse.BooleanOptionalAction,
+        help="Allow AMI tag lookup",
+        default=True,
     )
     cmd_find.set_defaults(func=find)
 

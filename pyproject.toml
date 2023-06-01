@@ -2,7 +2,14 @@
 name = "ds_helper"
 version = "0.1.0"
 
-dependencies = ["rucio >= 1.31", "pyAMI_atlas >= 5"]
+dependencies = ["rucio >= 1.31", "pyAMI_atlas >= 5", "prettytable>=3.5"]
+
+[project.optional-dependencies]
+test = [
+  'black',
+  'flake8',
+  'pytest',
+]
 
 [build-system]
 requires = ["setuptools", "wheel"]
