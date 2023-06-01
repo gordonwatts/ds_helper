@@ -1,6 +1,7 @@
 from ami_helper import ami_tag_metadata
 from ds_helper.ds_helpers import return_tags
 from typing import List, Dict
+from prettyTables import Table
 
 import argparse
 
@@ -30,7 +31,11 @@ def find(args):
                 dt["Cache"] = cache_name
             info.append(dt)
 
-    print(info)
+    if len(info) > 0:
+        output_table = Table()
+        for c in info[0].keys():
+            output_table.add_column(c, [f_info[c] for f_info in info])
+        print(output_table)
 
 
 def main():
