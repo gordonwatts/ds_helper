@@ -1,4 +1,4 @@
-from ami_helper import ami_tag_metadata
+from .ami_helper import ami_tag_metadata
 from ds_helper.ds_helpers import return_tags
 from typing import List, Dict
 from prettyTables import Table
