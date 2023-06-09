@@ -1,7 +1,10 @@
+from functools import lru_cache
 from typing import Dict
+
 import pyAMI.client
 
 
+@lru_cache(maxsize=100)
 def ami_tag_metadata(tag_name: str) -> Dict[str, str]:
     """Return all the tag metadata we can find for a particular tag name.
 
