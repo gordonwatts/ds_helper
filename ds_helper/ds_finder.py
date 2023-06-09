@@ -1,11 +1,13 @@
-from .ami_helper import ami_tag_metadata
-from ds_helper.ds_helpers import return_tags
-from typing import List, Dict
+import argparse
+from typing import Dict, List
+import logging
+
 from prettyTables import Table
 
-import argparse
-
+from ds_helper.ds_helpers import return_tags
 from ds_helper.rucio_helper import get_files, lookup_datasets
+
+from .ami_helper import ami_tag_metadata
 
 
 def find(args):
@@ -18,15 +20,18 @@ def find(args):
     Args:
         args (Dict[str, str]): The arguments from the `argparse` command
     """
+    logging.info(f"Looking up datasets matching {args.ds_name}")
     all_datasets = lookup_datasets(args.scope, args.ds_name)
     info: List[Dict[str, str]] = []
     for ds in all_datasets:
+        logging.info(f"Getting files list for {ds}")
         files = get_files(args.scope, ds)
         count = sum(1 for _ in files)
         dt = {"Name": ds, "Files": count}
         if count > 0:
             if args.ami:
                 tag = return_tags(ds)[-1]
+                logging.info(f"Getting AMI metadata for {tag}")
                 cache_name = ami_tag_metadata(tag)["cacheName"]
                 dt["Cache"] = cache_name
             info.append(dt)
@@ -48,6 +53,9 @@ def main():
     parser.add_argument(
         "--scope", help="The RUCIO scope of the dataset", default="mc16_13TeV"
     )
+    parser.add_argument(
+        "--verbose", "-v", action="count", default=0, help="Verbosity level"
+    )
     subparsers = parser.add_subparsers(title="Commands")
 
     # find command - search for datasets matching a pattern that still have files.
@@ -68,6 +76,15 @@ def main():
 
     # Parse the input and we are done.
     args = parser.parse_args()
+
+    # Set the logging level
+    if args.verbose == 0:
+        logging.basicConfig(level=logging.WARNING)
+    elif args.verbose == 1:
+        logging.basicConfig(level=logging.INFO)
+    elif args.verbose >= 2:
+        logging.basicConfig(level=logging.DEBUG)
+
     args.func(args)
 
 
